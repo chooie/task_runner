@@ -22,12 +22,18 @@ main()
 async function main() {
   const taskRunner = TaskRunner.make();
 
+  registerTasks(taskRunner);
+
+  await readTaskFromCommandLineAndInvokeIt(taskRunner);
+}
+
+function registerTasks(taskRunner) {
   taskRunner.registerTask({
     path: ["test", "watch"],
     taskFunction: watchTest,
     description: "Watch test",
   });
-  
+
   taskRunner.registerTask({
     path: ["test", "once"],
     taskFunction: test,
@@ -75,15 +81,13 @@ async function main() {
       console.log("Ran root!");
     },
   });
+}
 
+async function readTaskFromCommandLineAndInvokeIt(taskRunner) {
   const [, , commandLineArguments] = process.argv;
 
   if (commandLineArguments === undefined) {
-    const text = "Charlie's build tooling";
-    const textLength = text.length;
-    console.log(chalk.cyanBright("#".repeat(textLength + 4)));
-    console.log(chalk.cyanBright(`# ${text} #`));
-    console.log(chalk.cyanBright("#".repeat(textLength + 4) + "\n"));
+    logCharlieLogo();
     taskRunner.logTasks();
     return;
   }
@@ -92,6 +96,14 @@ async function main() {
   const commandPath = firstCommand.split(TaskRunner.TASK_SEPARATOR);
 
   await taskRunner.invokeTask(commandPath);
+
+  function logCharlieLogo() {
+    const text = "Charlie's build tooling";
+    const textLength = text.length;
+    console.log(chalk.cyanBright("#".repeat(textLength + 4)));
+    console.log(chalk.cyanBright(`# ${text} #`));
+    console.log(chalk.cyanBright("#".repeat(textLength + 4) + "\n"));
+  }
 }
 
 async function watchTest() {
